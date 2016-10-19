@@ -1,0 +1,55 @@
+{
+    "author": "Zeki Melek",
+    "dependencies": {
+        "pebble-clay": "^1.0.2"
+    },
+    "keywords": [],
+    "name": "text-based-on-qlocktwo",
+    "pebble": {
+        "capabilities": [
+            "configurable"
+        ],
+        "displayName": "text based on qlocktwo",
+        "enableMultiJS": true,
+        "messageKeys": [
+            "BackgroundColor",
+            "ForegroundColor",
+            "SecondTick",
+            "Animations"
+        ],
+        "projectType": "native",
+        "resources": {
+            "media": [
+                {
+                    "characterRegex": "[A-Z]",
+                    "file": "fonts/Helvetica-Bold.ttf",
+                    "name": "HELVETICA_BOLD_14",
+                    "targetPlatforms": null,
+                    "type": "font"
+                },
+                {
+                    "characterRegex": "[A-Z]",
+                    "file": "fonts/Helvetica.ttf",
+                    "name": "HELVETICA_14",
+                    "targetPlatforms": null,
+                    "type": "font"
+                },
+                {
+                    "file": "images/qlocktwo.png",
+                    "name": "IMAGE_FRONT",
+                    "targetPlatforms": null,
+                    "type": "png"
+                }
+            ]
+        },
+        "sdkVersion": "3",
+        "targetPlatforms": [
+            "basalt"
+        ],
+        "uuid": "b1d991b6-5b38-4cc6-8619-e3cef76524db",
+        "watchapp": {
+            "watchface": true
+        }
+    },
+    "version": "0.1.0"
+}
