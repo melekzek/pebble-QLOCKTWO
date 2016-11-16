@@ -2,8 +2,23 @@
 
 //#define DEBUG 
 
+// Persistent storage key
+#define SETTINGS_KEY 1
+
+// Define our settings struct
+typedef struct ClaySettings 
+{
+  GColor BackgroundColor;
+  GColor ForegroundColor;
+  bool SecondTick;
+  bool Animations;
+} ClaySettings;
+
+// An instance of the struct
+static ClaySettings settings;
+
 static const char* const QLOCKTWO[] = {
-  "ITLISASTIME",
+  "ITLISPEBBLE",
   "ACQUARTERDC",
   "TWENTYFIVEX",
   "HALFBTENFTO",
@@ -43,7 +58,7 @@ static void displayChar(int i, int j, bool v)
 {
   TextLayer *layer = qlocktwo_layer[i][j];  
   #ifdef DEBUG
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "%s %dx%d", ((v) ? "show" : "hide"), i, j);
+  //APP_LOG(APP_LOG_LEVEL_DEBUG, "%s %dx%d", ((v) ? "show" : "hide"), i, j);
   #endif
   text_layer_set_font(layer, v ? eq_font : lt_font);
   text_layer_set_text_color(layer, v ? eq_active : eq_text);  
@@ -239,7 +254,8 @@ static void activateString(unsigned short*m, int hour, int min )
   }
 }
 
-static void update_time(struct tm* t) {
+static void update_time(struct tm* t) 
+{
   /*
   int step_count = 2345;
   if (show_steps) {
@@ -275,7 +291,7 @@ static void update_time(struct tm* t) {
   {
     const unsigned short mask = matrix[j] ^ newMatrix[j];
     #ifdef DEBUG
-     APP_LOG(APP_LOG_LEVEL_DEBUG, "setting %d : %d ^ %d = %d", i, matrix[i], newMatrix[i], mask);
+     APP_LOG(APP_LOG_LEVEL_DEBUG, "setting %d : %d ^ %d = %d", j, matrix[j], newMatrix[j], mask);
     #endif
 
     if (mask > 0)
@@ -288,7 +304,8 @@ static void update_time(struct tm* t) {
 }
 
 /*
-static void tap_handler(AccelAxisType axis, int32_t direction) {
+static void tap_handler(AccelAxisType axis, int32_t direction) 
+{
   if (shake == 0) {
     // do nothing
     return;
@@ -310,27 +327,64 @@ static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed)
   update_time(tick_time);
 }
 
-static void window_load(Window *window) {
-  prevMin = -1;
-  resetMatrix(matrix);
+static uint8_t blend_colors(uint8_t foreground, uint8_t background)
+{
+  uint8_t result;
+  result = (foreground > background) ?
+     ((foreground - background) / 2 + background)
+     : (background - (background - foreground) / 2);
+  return result;
+}
+
+static void get_colors_from_settings()
+{
+  eq_active = settings.ForegroundColor;
+  eq_bg = settings.BackgroundColor;
+  
+  eq_text.r = blend_colors(eq_active.r, eq_bg.r);
+  eq_text.g = blend_colors(eq_active.g, eq_bg.g);
+  eq_text.b = blend_colors(eq_active.b, eq_bg.b);
+  eq_text.a = 3;
+
+  #ifdef DEBUG
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "color %dx%dx%d", eq_text.r, eq_text.g, eq_text.b);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "activecolor %dx%dx%d", eq_active.r, eq_active.g, eq_active.b);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "bg %dx%dx%d", eq_bg.r, eq_bg.g, eq_bg.b);
+  #endif
+}
+
+static void resetScreen()
+{
+    prevMin = -1;
+    resetMatrix(matrix);  
+    for (int j = 0; j < 10; j++)
+      for (int i = 0; i < 11; i++)
+          displayChar(j, i, false);
+      
+    // display pebble
+    for (int i = 5; i < 11; i++)
+    {
+      setMatrix(matrix, i, 0, true);
+      displayChar(0, i, true);
+    }
+}
+
+static void window_load(Window *window) 
+{
+  #ifdef DEBUG
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "called window_load");
+  #endif
   
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_unobstructed_bounds(window_layer);
-  //lt_font = fonts_load_custom_font(fonts_get_system_font(FONT_KEY_GOTHIC_14));
+  // lets assume height is fixed
+  bounds.size.h = 168;
+
   lt_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_HELVETICA_14));
   eq_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_HELVETICA_BOLD_14));
 
-
-#ifdef PBL_COLOR
-  eq_bg = GColorBlack/*GColorOxfordBlue*/;
-  eq_text = GColorDarkGray;
-  eq_active = GColorWhite;
-#else
-  eq_bg = GColorBlack;
-  eq_text = GColorDarkGray;
-  eq_active = GColorWhite;
-#endif
-
+  get_colors_from_settings();
+  
   window_set_background_color(window, eq_bg);
   const int height = bounds.size.h/10;
   const int width = bounds.size.w/11;
@@ -343,20 +397,21 @@ static void window_load(Window *window) {
     text_layer_set_text(qlocktwo_layer[i][j], &qlocktwoChar[i][j][0]);
     text_layer_set_background_color(qlocktwo_layer[i][j], GColorClear);
     text_layer_set_text_alignment(qlocktwo_layer[i][j], GTextAlignmentCenter);
-    text_layer_set_text_color(qlocktwo_layer[i][j], eq_text);
+    text_layer_set_text_color(qlocktwo_layer[i][j],  eq_text);
     layer_add_child(window_layer, text_layer_get_layer(qlocktwo_layer[i][j]));
   }
-  //for (int j = 0; j < 11; j++)
-  //  layer_set_hidden(text_layer_get_layer(qlocktwo_layer[10][j]), true);
+  resetScreen();  
 }
 
-static void window_unload(Window *window) {
+static void window_unload(Window *window) 
+{
   for (int i = 0; i < 10; i++)
     for (int j = 0; j < 11; j++)
       text_layer_destroy(qlocktwo_layer[i][j]);
 }
 
-static void prv_unobstructed_did_change(GRect bounds, void *context) {
+static void prv_unobstructed_did_change(GRect bounds, void *context) 
+{
 /*
   layer_set_frame(text_layer_get_layer(hour_layer), (GRect) { .origin = { 0, bounds.size.h/2-62 }, .size = { bounds.size.w, 65 } });
   layer_set_frame(text_layer_get_layer(hour_label_layer), (GRect) { .origin = { 0, bounds.size.h/2-12 }, .size = { bounds.size.w, 15 } });
@@ -375,21 +430,60 @@ static void prv_unobstructed_did_change(GRect bounds, void *context) {
   */
 }
 
-static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) {
+// Save the settings to persistent storage
+static void prv_save_settings() 
+{
+  persist_write_data(SETTINGS_KEY, &settings, sizeof(settings));
+}
+
+// Initialize the default settings
+static void prv_default_settings() 
+{
+  settings.BackgroundColor = GColorBlack;
+  settings.ForegroundColor = GColorWhite;
+  settings.SecondTick = false;
+  settings.Animations = false;
+}
+
+// Read settings from persistent storage
+static void prv_load_settings() 
+{
+  // Load the default settings
+  prv_default_settings();
+  // Read settings from persistent storage, if they exist
+  persist_read_data(SETTINGS_KEY, &settings, sizeof(settings));
+}
+
+static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
+{
+  bool anyChange = false;
   // Read color preferences
-  Tuple *bg_color_t = dict_find(iter, MESSAGE_KEY_BackgroundColor);
+  const Tuple *bg_color_t = dict_find(iter, MESSAGE_KEY_BackgroundColor);
   if(bg_color_t) {
-    GColor bg_color = GColorFromHEX(bg_color_t->value->int32);
-    //#ifdef DEBUG
-     APP_LOG(APP_LOG_LEVEL_DEBUG, "color received %dx%dx%d", bg_color.r, bg_color.g, bg_color.b);
-    //#endif
-  }
-/*
-  Tuple *fg_color_t = dict_find(iter, MESSAGE_KEY_ForegroundColor);
-  if(fg_color_t) {
-    GColor fg_color = GColorFromHEX(fg_color_t->value->int32);
+    const GColor bg_color = GColorFromHEX(bg_color_t->value->int32);
+    if (settings.BackgroundColor.r != bg_color.r
+       || settings.BackgroundColor.g != bg_color.g
+       || settings.BackgroundColor.b != bg_color.b)
+    {
+      settings.BackgroundColor = bg_color;
+      window_set_background_color(window, settings.BackgroundColor);
+      anyChange = true;
+    }
   }
 
+  const Tuple *fg_color_t = dict_find(iter, MESSAGE_KEY_ForegroundColor);
+  if(fg_color_t) 
+  {
+    const GColor fg_color = GColorFromHEX(fg_color_t->value->int32);
+    if (settings.ForegroundColor.r != fg_color.r
+       || settings.ForegroundColor.g != fg_color.g
+       || settings.ForegroundColor.b != fg_color.b)
+    {
+      settings.ForegroundColor = fg_color;
+      anyChange = true;
+     }
+  }
+/*
   // Read boolean preferences
   Tuple *second_tick_t = dict_find(iter, MESSAGE_KEY_SecondTick);
   if(second_tick_t) {
@@ -401,15 +495,34 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
     bool animations = animations_t->value->int32 == 1;
   }
 */
+  if (anyChange)
+  {
+    get_colors_from_settings();
+    prv_save_settings();
+    // redraw everything
+    resetScreen();
+  }
 }
 
-void prv_init(void) {
+void prv_init(void) 
+{
   // Open AppMessage connection
   app_message_register_inbox_received(prv_inbox_received_handler);
   app_message_open(128, 128);
 }
 
-static void init(void) {
+static void init(void) 
+{
+  #ifdef DEBUG
+  const WatchInfoModel info = watch_info_get_model();
+  if (  info != WATCH_INFO_MODEL_PEBBLE_TIME 
+     && info != WATCH_INFO_MODEL_PEBBLE_TIME_STEEL)
+  {
+    APP_LOG(APP_LOG_LEVEL_INFO, "Unsupported watch %d", info);
+  }
+  #endif
+  
+  prv_load_settings();
 //  accel_tap_service_subscribe(tap_handler);
   tick_timer_service_subscribe(MINUTE_UNIT, &handle_minute_tick);
   window = window_create();
@@ -425,14 +538,16 @@ static void init(void) {
   prv_init();
 }
 
-static void deinit(void) {
+static void deinit(void) 
+{
   unobstructed_area_service_unsubscribe();
   window_destroy(window);
   tick_timer_service_unsubscribe();
 //  accel_tap_service_unsubscribe();
 }
 
-int main(void) {
+int main(void) 
+{
   init();
   // APP_LOG(APP_LOG_LEVEL_DEBUG, "Done initializing, pushed window: %p", window);
   app_event_loop();

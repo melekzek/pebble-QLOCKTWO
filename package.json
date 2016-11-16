@@ -13,9 +13,7 @@
         "enableMultiJS": true,
         "messageKeys": [
             "BackgroundColor",
-            "ForegroundColor",
-            "SecondTick",
-            "Animations"
+            "ForegroundColor"
         ],
         "projectType": "native",
         "resources": {

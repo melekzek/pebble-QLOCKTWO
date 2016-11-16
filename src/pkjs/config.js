@@ -5,7 +5,7 @@ module.exports = [
   },
   {
     "type": "text",
-    "defaultValue": "Here is some introductory text."
+    "defaultValue": "Text Watchface based on QLOCKTWO"
   },
   {
     "type": "section",
@@ -24,11 +24,11 @@ module.exports = [
         "type": "color",
         "messageKey": "ForegroundColor",
         "defaultValue": "0xFFFFFF",
-        "label": "Foreground Color"
+        "label": "Active Text Color"
       }
     ]
   },
-  {
+  /*{
     "type": "section",
     "items": [
       {
@@ -48,7 +48,7 @@ module.exports = [
         "defaultValue": false
       }
     ]
-  },
+  },*/
   {
     "type": "submit",
     "defaultValue": "Save Settings"
