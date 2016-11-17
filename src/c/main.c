@@ -327,13 +327,17 @@ static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed)
   update_time(tick_time);
 }
 
-static uint8_t blend_colors(uint8_t foreground, uint8_t background)
+static inline uint8_t blend_colors(uint8_t foreground, uint8_t background)
 {
+  #if defined(PBL_COLOR)
   uint8_t result;
   result = (foreground > background) ?
      ((foreground - background) / 2 + background)
      : (background - (background - foreground) / 2);
   return result;
+  #else
+  return foreground;
+  #endif
 }
 
 static void get_colors_from_settings()
@@ -376,12 +380,17 @@ static void window_load(Window *window)
   #endif
   
   Layer *window_layer = window_get_root_layer(window);
-  GRect bounds = layer_get_unobstructed_bounds(window_layer);
+  GRect bounds = layer_get_bounds(window_layer);
   // lets assume height is fixed
-  bounds.size.h = 168;
+  //bounds.size.h = 168;
 
+  #if defined(PBL_COLOR)
   lt_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_HELVETICA_14));
-  eq_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_HELVETICA_BOLD_14));
+  eq_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_HELVETICA_BOLD_14));  
+  #else
+  lt_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_HELVETICA_ULTRA_LIGHT_CONDENSED_14));
+  eq_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_HELVETICA_BLACK_CONDENSED_14));
+  #endif
 
   get_colors_from_settings();
   

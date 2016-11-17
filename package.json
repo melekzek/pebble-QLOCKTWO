@@ -20,6 +20,20 @@
             "media": [
                 {
                     "characterRegex": "[A-Z]",
+                    "file": "fonts/Helvetica_Black_Condensed.ttf",
+                    "name": "HELVETICA_BLACK_CONDENSED_14",
+                    "targetPlatforms": null,
+                    "type": "font"
+                },
+                {
+                    "characterRegex": "[A-Z]",
+                    "file": "fonts/Helvetica_LT_Ultra_Light_Condensed.ttf",
+                    "name": "HELVETICA_ULTRA_LIGHT_CONDENSED_14",
+                    "targetPlatforms": null,
+                    "type": "font"
+                },
+                {
+                    "characterRegex": "[A-Z]",
                     "file": "fonts/Helvetica-Bold.ttf",
                     "name": "HELVETICA_BOLD_14",
                     "targetPlatforms": null,
@@ -42,12 +56,15 @@
         },
         "sdkVersion": "3",
         "targetPlatforms": [
-            "basalt"
+            "aplite",
+            "basalt",
+            "diorite",
+            "emery"
         ],
         "uuid": "b1d991b6-5b38-4cc6-8619-e3cef76524db",
         "watchapp": {
             "watchface": true
         }
     },
-    "version": "0.1.0"
+    "version": "0.2.0"
 }
