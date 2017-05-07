@@ -21,14 +21,14 @@
                 {
                     "characterRegex": "[A-Z]",
                     "file": "fonts/Helvetica_Black_Condensed.ttf",
-                    "name": "HELVETICA_BLACK_CONDENSED_14",
+                    "name": "HELVETICA_BLACK_CONDENSED_16",
                     "targetPlatforms": null,
                     "type": "font"
                 },
                 {
                     "characterRegex": "[A-Z]",
                     "file": "fonts/Helvetica_LT_Ultra_Light_Condensed.ttf",
-                    "name": "HELVETICA_ULTRA_LIGHT_CONDENSED_14",
+                    "name": "HELVETICA_ULTRA_LIGHT_CONDENSED_12",
                     "targetPlatforms": null,
                     "type": "font"
                 },
@@ -58,13 +58,12 @@
         "targetPlatforms": [
             "aplite",
             "basalt",
-            "diorite",
-            "emery"
+            "diorite"
         ],
         "uuid": "b1d991b6-5b38-4cc6-8619-e3cef76524db",
         "watchapp": {
             "watchface": true
         }
     },
-    "version": "0.2.0"
+    "version": "0.3.0"
 }

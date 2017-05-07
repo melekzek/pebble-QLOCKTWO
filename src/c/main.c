@@ -41,6 +41,8 @@ static GColor eq_text;
 static GColor eq_active;
 static int prevMin = -1;
 static unsigned short matrix[10];
+static int width;
+static int height;
 
 //static const HealthMetric metric = HealthMetricStepCount;
 
@@ -61,7 +63,15 @@ static void displayChar(int i, int j, bool v)
   //APP_LOG(APP_LOG_LEVEL_DEBUG, "%s %dx%d", ((v) ? "show" : "hide"), i, j);
   #endif
   text_layer_set_font(layer, v ? eq_font : lt_font);
-  text_layer_set_text_color(layer, v ? eq_active : eq_text);  
+  text_layer_set_text_color(layer, v ? eq_active : eq_text);
+  #if defined(PBL_COLOR)
+  #else
+  Layer* mainlayer = text_layer_get_layer(layer);
+  GRect frame = layer_get_frame(mainlayer);
+  //frame.origin.x = j * width;
+  frame.origin.y = i * height + (v ? 0 : 3);
+  layer_set_frame(mainlayer, frame);
+  #endif
 }
 
 inline  void activeChar(unsigned short*m, int x, int y) 
@@ -385,18 +395,18 @@ static void window_load(Window *window)
   //bounds.size.h = 168;
 
   #if defined(PBL_COLOR)
-  lt_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_HELVETICA_14));
-  eq_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_HELVETICA_BOLD_14));  
+   lt_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_HELVETICA_14));
+   eq_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_HELVETICA_BOLD_14));  
   #else
-  lt_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_HELVETICA_ULTRA_LIGHT_CONDENSED_14));
-  eq_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_HELVETICA_BLACK_CONDENSED_14));
+   lt_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_HELVETICA_ULTRA_LIGHT_CONDENSED_12));
+   eq_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_HELVETICA_BLACK_CONDENSED_16));
   #endif
 
   get_colors_from_settings();
   
   window_set_background_color(window, eq_bg);
-  const int height = bounds.size.h/10;
-  const int width = bounds.size.w/11;
+  height = bounds.size.h/10;
+  width = bounds.size.w/11;
   for (int i = 0; i < 10; i++)
     for (int j = 0; j < 11; j++)
   {
